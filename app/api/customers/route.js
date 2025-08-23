@@ -2,10 +2,24 @@ import connectMongo from '../../../lib/mongodb'
 import Customer from '../../../models/Customers'
 
 
-export default function POST(req) {
+export async function GET(){
+
+    await connectMongo();
+    const customers = await Customer.find()
+   
+    
+    return new Response(JSON.stringify(customers),{status:200})
+
+}
 
 
-    console.log('reached route.js');
+export async function POST(req) {
+
+  await connectMongo()
+  const body = await req.json()
+  const customer = await Customer.create(body)
+  return new Response(JSON.stringify(customer),{status:201})
+     
     
     
 }

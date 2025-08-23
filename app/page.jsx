@@ -7,9 +7,17 @@ export default function Home(){
     const [form,setForm] = useState({name:"",email:""})
 
 
+    const fetchCustomers = async ()=> {
+        const res = await fetch('/api/customers')
+        const data =await res.json()
+        setCustomers(data)
+        
+        
+        
+    }
 
     useEffect(()=>{
-
+       fetchCustomers()
     },[])
 
 
@@ -18,10 +26,14 @@ export default function Home(){
                     
     }
 
-    const handleSubmit =(e)=> {
+    const handleSubmit =async (e)=> {
         e.preventDefault()
-     console.log(e);
      
+     await fetch('/api/customers',{
+        method:'POST',
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(form)
+     }) 
     }
 
     return (
@@ -62,16 +74,23 @@ export default function Home(){
           </tr>
         </thead>
         <tbody>
-         
-            <tr >
-              <td>cust.name</td>
-              <td>cust.email</td>
+         {customers.map((cust)=>(
+    
+    console.log(cust),
+    
+ <tr key={cust._id}>
+              <td>{cust.name}</td>
+              <td>{cust.email}</td>
               
               <td>
                 <button >Edit</button>
                 <button >Delete</button>
               </td>
             </tr>
+
+
+         ))}
+           
          
         </tbody>
       </table>
