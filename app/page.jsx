@@ -5,6 +5,7 @@ export default function Home(){
 
     const [customers,setCustomers] = useState([])
     const [form,setForm] = useState({name:"",email:""})
+    const [editingId,setEditingId] = useState(null)
 
 
     const fetchCustomers = async ()=> {
@@ -28,20 +29,34 @@ export default function Home(){
 
     const handleSubmit =async (e)=> {
         e.preventDefault()
-     
+     if(editingId){
+       await fetch('/api/customers',{
+          method:'PUT',
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({id:editingId,...form})
+       })    
+          setEditingId(null);
+     }else{
      await fetch('/api/customers',{
         method:'POST',
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify(form)
      }) 
+     }
+            setForm({name:"",email:""});
+               fetchCustomers()
+
+    }
+    const handleEdit = (cust)=> {
+      setForm({name:cust.name,email:cust.email})
+      setEditingId(cust._id)
+        
     }
 
     return (
-
+ 
          <div style={{ padding: "20px" }}>
-      
-
-     
+        
       <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
         <input
           name="name"
@@ -62,7 +77,7 @@ export default function Home(){
         />
         
         <button type="submit">
-          
+          {editingId?"Update":"Add"}
         </button>
       </form>
 
@@ -76,14 +91,12 @@ export default function Home(){
         <tbody>
          {customers.map((cust)=>(
     
-    console.log(cust),
-    
  <tr key={cust._id}>
               <td>{cust.name}</td>
               <td>{cust.email}</td>
               
               <td>
-                <button >Edit</button>
+                <button onClick={()=>handleEdit(cust)} >Edit</button>
                 <button >Delete</button>
               </td>
             </tr>
