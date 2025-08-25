@@ -9,12 +9,12 @@ export default function Home(){
 
 
     const fetchCustomers = async ()=> {
-        const res = await fetch('/api/customers')
+        const res = await fetch('/api/customers')        
         const data =await res.json()
+               
+
         setCustomers(data)
-        
-        
-        
+           
     }
 
     useEffect(()=>{
@@ -51,6 +51,15 @@ export default function Home(){
       setForm({name:cust.name,email:cust.email})
       setEditingId(cust._id)
         
+    }
+
+    const handleDelete = async(id)=>{
+        await fetch('/api/customers',{
+          method:'DELETE',
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({id})
+        })
+        fetchCustomers()
     }
 
     return (
@@ -97,7 +106,7 @@ export default function Home(){
               
               <td>
                 <button onClick={()=>handleEdit(cust)} >Edit</button>
-                <button >Delete</button>
+                <button onClick={()=>handleDelete(cust._id)}>Delete</button>
               </td>
             </tr>
 

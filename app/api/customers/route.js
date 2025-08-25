@@ -47,3 +47,18 @@ export async function PUT(req){
     
 
 }
+
+export async function DELETE(req){
+try {
+     await connectMongo()
+
+    const body = await req.json()
+    const {id} = body
+
+    await Customer.findByIdAndDelete(id)
+     return new Response(JSON.stringify({ message: "Customer deleted successfully" }), { status: 200 });
+} catch (err) {
+     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+}
+   
+}
