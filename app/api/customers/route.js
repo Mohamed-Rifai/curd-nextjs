@@ -16,8 +16,8 @@ export async function POST(req) {
 try {
       await connectMongo()
   const body = await req.json()
-  const customer = await Customer.create(body)
-  return new Response(JSON.stringify(customer),{status:201})
+  await Customer.create(body)
+  return new Response(JSON.stringify({message:'added successfully'}),{status:201})
       
 } catch (err) {
      return new Response(JSON.stringify({ error: err.message }), { status: 500 });
@@ -40,7 +40,7 @@ export async function PUT(req){
         )
                    console.log(updatedCustomer);
 
-        return new Response(JSON.stringify(updatedCustomer),{status:200})
+        return new Response(JSON.stringify({message:"Updated successfully"}),{status:200})
     } catch (err) {
          return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }

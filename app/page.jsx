@@ -1,18 +1,22 @@
 "use client";
 import { useEffect, useState } from "react"
+import { Dialog, DialogTitle, DialogActions, Button } from "@mui/material";
+import toast from "react-hot-toast";
 
 export default function Home(){
 
     const [customers,setCustomers] = useState([])
     const [form,setForm] = useState({name:"",email:""})
     const [editingId,setEditingId] = useState(null)
+      //deletion states
+    const [open, setOpen] = useState(false)
+    const [selectedCust, setSelectedCust] = useState(null)
 
 
+    //fetch all customers -get method
     const fetchCustomers = async ()=> {
         const res = await fetch('/api/customers')        
-        const data =await res.json()
-               
-
+        const data =await res.json()             
         setCustomers(data)
            
     }
@@ -29,19 +33,35 @@ export default function Home(){
 
     const handleSubmit =async (e)=> {
         e.preventDefault()
-     if(editingId){
-       await fetch('/api/customers',{
+   if(editingId){
+    const res=    await fetch('/api/customers',{
           method:'PUT',
           headers:{"Content-Type":"application/json"},
           body:JSON.stringify({id:editingId,...form})
-       })    
-          setEditingId(null);
-     }else{
-     await fetch('/api/customers',{
+       }) 
+       const data =await res.json()
+     
+       if (res.ok) {
+        toast.success(data.message)
+        setEditingId(null);
+       }else{
+        toast.error(data.error||'something went wrong')
+       }
+        
+      
+ }else{
+     const res= await fetch('/api/customers',{
         method:'POST',
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify(form)
      }) 
+     const data =await res.json()
+     
+     if (res.ok) {
+      toast.success(data.message)
+     }else{
+      toast.error(data.error||'somthing went wrong')
+     }
      }
             setForm({name:"",email:""});
                fetchCustomers()
@@ -52,14 +72,30 @@ export default function Home(){
       setEditingId(cust._id)
         
     }
+    //confirmation modal show
+    const handleClickDelete = (cust)=> {
+          setSelectedCust(cust)
+          setOpen(true)
+    }
 
-    const handleDelete = async(id)=>{
-        await fetch('/api/customers',{
+
+    const handleConfirmDelete = async()=>{
+      if(!selectedCust) return;
+      const res =   await fetch('/api/customers',{
           method:'DELETE',
           headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({id})
+          body:JSON.stringify({id:selectedCust._id})
         })
-        fetchCustomers()
+         setOpen(false)
+        const data =await res.json()
+       
+        if(res.ok){
+          toast.success(data.message)
+           fetchCustomers()
+        }else{
+          toast.error(data.error||'something went wrong')
+        }
+       
     }
 
     return (
@@ -106,7 +142,7 @@ export default function Home(){
               
               <td>
                 <button onClick={()=>handleEdit(cust)} >Edit</button>
-                <button onClick={()=>handleDelete(cust._id)}>Delete</button>
+                <button onClick={()=>handleClickDelete(cust)}>Delete</button>
               </td>
             </tr>
 
@@ -116,6 +152,19 @@ export default function Home(){
          
         </tbody>
       </table>
+            {/* modal */}
+       <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>
+          Are you sure you want to delete 
+          <b> {selectedCust?.name}</b>?
+        </DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)}>No</Button>
+          <Button onClick={handleConfirmDelete} color="error">Yes</Button>
+        </DialogActions>
+      </Dialog>
+
     </div>
+
     )
 }
